@@ -5,70 +5,209 @@ var model = {
 	shipsSunk: 0,
 
 	ships: [
-		{ locations: [0, 0, 0], hits: ["", "", ""] }, //модели кораблей
 		{ locations: [0, 0, 0], hits: ["", "", ""] },
-		{ locations: [0, 0, 0], hits: ["", "", ""] }
-	],
-  fire: function(guess) { // метод получает координаты выстрела
-		for (var i = 0; i < this.numShips; i++) { // перебирает массив проверяя каждый корабль
-			var ship = this.ships[i]; // объект корабля. Необходимо проверить, совпадают ли координаты выстрела с координатами одной из занимаемых им клеток.
+		{ locations: [0, 0, 0], hits: ["", "", ""] },
+		{ locations: [0, 0, 0], hits: ["", "", ""] }],
+	fire:function(guess) {
+		for (let i = 0; i < this.numShips; i++) {
+			let ship = this.ships[i];
+			let index = ship.locations.indexOf(guess);
+			if (index >= 0) {
+				ship.hits[index] = 'hit';
+				view.displayHit(guess); //
+				view.displayMessage("HIT!");
+				if (this.isSunk(ship)) {
+					view.displayMessage("You sank my battleship!"); //сообщение о потоплении корабля
+					this.shipsSunk++; //
+				}
+				return true;
+			}
+		}
+		view.displayMiss(guess);
+		view.displayMessage("You missed.");
+		return false;
+	},
+	isSunk: function(ship) {
+		for (let i = 0; i < this.shipLength; i++) {
+			if (ship.hits[i] !== "hit") {
+				 	return false;
+			}
+		}
+		return true;
+	}
+};
+	fire: function(guess) {
+		for (var i = 0; i < this.numShips; i++) {
+			var ship = this.ships[i];
 			var index = ship.locations.indexOf(guess);
-    }
-  }
+
+
+			if (ship.hits[index] === "hit") {
+				view.displayMessage("Oops, you already hit that location!");
+				return true;
+			} else if (index >= 0) {
+				ship.hits[index] = "hit";
+				view.displayHit(guess);
+				view.displayMessage("HIT!");
+
+				if (this.isSunk(ship)) {
+					view.displayMessage("You sank my battleship!");
+					this.shipsSunk++;
+				}
+				return true;
+			}
+		}
+		view.displayMiss(guess);
+		view.displayMessage("You missed.");
+		return false;
+	},
+
+	isSunk: function(ship) {
+		for (var i = 0; i < this.shipLength; i++)  {
+			if (ship.hits[i] !== "hit") {
+				return false;
+			}
+		}
+	    return true;
+	},
+
+	generateShipLocations: function() {
+		var locations;
+		for (var i = 0; i < this.numShips; i++) {
+			do {
+				locations = this.generateShip();
+			} while (this.collision(locations));
+			this.ships[i].locations = locations;
+		}
+		console.log("Ships array: ");
+		console.log(this.ships);
+	},
+
+	generateShip: function() {
+		var direction = Math.floor(Math.random() * 2);
+		var row, col;
+
+		if (direction === 1) {
+			row = Math.floor(Math.random() * this.boardSize);
+			col = Math.floor(Math.random() * (this.boardSize - this.shipLength + 1));
+		} else { // vertical
+			row = Math.floor(Math.random() * (this.boardSize - this.shipLength + 1));
+			col = Math.floor(Math.random() * this.boardSize);
+		}
+
+		var newShipLocations = [];
+		for (var i = 0; i < this.shipLength; i++) {
+			if (direction === 1) {
+				newShipLocations.push(row + "" + (col + i));
+			} else {
+				newShipLocations.push((row + i) + "" + col);
+			}
+		}
+		return newShipLocations;
+	},
+
+	collision: function(locations) {
+		for (var i = 0; i < this.numShips; i++) {
+			var ship = this.ships[i];
+			for (var j = 0; j < locations.length; j++) {
+				if (ship.locations.indexOf(locations[j]) >= 0) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 };
 
 
-// let randomLoc = Math.floor(Math.random() * 5); // умножаем на 5 потому что перавя точка не может быть больше 4
-// let location1 = randomLoc;
-// let location2 = randomLoc + 1;
-// let location3 = randomLoc + 2;
-//
-// let guess; // эта переменная не важна пока пользватель не введет координаты выстрела.
-// let hits = 0; // присваивается начальное значение 0;
-// let guesses = 0; // присваивается начальное значение 0;
-// let isSunk = false; // пока корабль не потоплен значеие false;
-//
-// while (isSunk == false) {
-//   prompt('Ready, aim, fire! (enter a number 0-6):'); // при каждом выполнении цикла,запрашиваем у пользователя координаты выстрела
-//   if (guess < 0 || guess > 6) {
-//     alert('Please enter a valid cell number!');
-//   } else {
-//     guesses += 1; // если значение корректно, то увеличиваем кол-во выстрелов пользователя
-//       if (guess == location1 || guess == location2 || guess == location3) {
-//         alert('HIT!');
-//         hits += 1; //если есть попадание, увеличиваем счетчик
-//         if (hits == 3) {
-//           isSunk = true;
-//           alert('You sank my battleship!');
-//         }
-//       } else {
-//         alert('MISS');
-//       }
-//     }
-// }
-// let stats = "You took " + guesses + " guesses to sink the batlleship, " + "which means your shooting accuracy was " + (3/guesses);
-// alert(stats);
-//
-// var view = {
-// 	displayMessage: function(msg) {
-// 		var messageArea = document.getElementById("messageArea");
-// 		messageArea.innerHTML = msg;
-// 	},
-//
-// 	displayHit: function(location) {
-// 		var cell = document.getElementById(location);
-// 		cell.setAttribute("class", "hit");
-// 	},
-//
-// 	displayMiss: function(location) {
-// 		var cell = document.getElementById(location);
-// 		cell.setAttribute("class", "miss");
-// 	}
-//
-// };
-// view.displayMiss("00");
-// view.displayHit("34");
-// view.displayMiss("55");
-// view.displayHit("12");
-// view.displayMiss("25");
-// view.displayHit("26");
+var view = {
+	displayMessage: function(msg) {
+		var messageArea = document.getElementById("messageArea");
+		messageArea.innerHTML = msg;
+	},
+
+	displayHit: function(location) {
+		var cell = document.getElementById(location);
+		cell.setAttribute("class", "hit");
+	},
+
+	displayMiss: function(location) {
+		var cell = document.getElementById(location);
+		cell.setAttribute("class", "miss");
+	}
+
+};
+
+var controller = {
+	guesses: 0,
+
+	processGuess: function(guess) {
+		var location = parseGuess(guess);
+		if (location) {
+			this.guesses++;
+			var hit = model.fire(location);
+			if (hit && model.shipsSunk === model.numShips) {
+					view.displayMessage("You sank all my battleships, in " + this.guesses + " guesses");
+			}
+		}
+	}
+}
+
+function parseGuess(guess) {
+	var alphabet = ["A", "B", "C", "D", "E", "F", "G"];
+
+	if (guess === null || guess.length !== 2) {
+		alert("Oops, please enter a letter and a number on the board.");
+	} else {
+		var firstChar = guess.charAt(0);
+		var row = alphabet.indexOf(firstChar);
+		var column = guess.charAt(1);
+
+		if (isNaN(row) || isNaN(column)) {
+			alert("Oops, that isn't on the board.");
+		} else if (row < 0 || row >= model.boardSize ||
+		           column < 0 || column >= model.boardSize) {
+			alert("Oops, that's off the board!");
+		} else {
+			return row + column;
+		}
+	}
+	return null;
+}
+
+
+
+function handleFireButton() {
+	var guessInput = document.getElementById("guessInput");
+	var guess = guessInput.value.toUpperCase();
+
+	controller.processGuess(guess);
+
+	guessInput.value = "";
+}
+
+function handleKeyPress(e) {
+	var fireButton = document.getElementById("fireButton");
+
+	e = e || window.event;
+
+	if (e.keyCode === 13) {
+		fireButton.click();
+		return false;
+	}
+}
+
+
+
+window.onload = init;
+
+function init() {
+	var fireButton = document.getElementById("fireButton");
+	fireButton.onclick = handleFireButton;
+
+	var guessInput = document.getElementById("guessInput");
+	guessInput.onkeypress = handleKeyPress;
+
+	model.generateShipLocations();
+}
