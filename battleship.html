@@ -45,6 +45,10 @@ form input {
 .miss {
     background: url("miss.png") no-repeat center center;
 }
+displayHit: function(location) {
+    var cell = document.getElementById(location);
+    cell.setAttribute("class", "hit");
+},
     </style>
   </head>
 <body>
@@ -85,6 +89,6 @@ form input {
       <input type="button" id="fireButton" value="Fire!">
     </form>
   </div>
-  <script src="battleshi"></script>
+  <script src="battleship."></script>
 </body>
 </html>
